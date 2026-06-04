@@ -14,17 +14,28 @@
 import json
 import urllib.request
 
-ADOPTIUM_API_URL = "https://api.adoptium.net/v3/info/available_releases"
+#ADOPTIUM_API_URL = "https://api.adoptium.net/v3/info/available_releases"
 
 
 def _fetch_release_data():
-    """Fetch release info from the Adoptium API."""
-    req = urllib.request.Request(
-        ADOPTIUM_API_URL,
-        headers={"User-Agent": "Adoptium Dockerfile Updater"},
-    )
-    with urllib.request.urlopen(req) as response:
-        return json.loads(response.read().decode("utf-8"))
+    # """Fetch release info from the Adoptium API."""
+    # req = urllib.request.Request(
+    #     ADOPTIUM_API_URL,
+    #     headers={"User-Agent": "Adoptium Dockerfile Updater"},
+    # )
+    # with urllib.request.urlopen(req) as response:
+    #     return json.loads(response.read().decode("utf-8"))
+    json_str = '''
+    {
+        "available_lts_releases": [8, 11, 17, 21, 25],
+        "available_releases": [8, 11, 17, 21, 25, 26],
+        "most_recent_feature_release": 26,
+        "most_recent_feature_version": 27,
+        "most_recent_lts": 25,
+        "tip_version": 27
+    }
+    '''
+    return json.loads(json_str)
 
 
 def get_supported_versions():

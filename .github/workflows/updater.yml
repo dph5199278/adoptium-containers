@@ -12,7 +12,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write    
-    if: startsWith(github.repository, 'adoptium/')
+    if: startsWith(github.repository, 'dph5199278/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -38,4 +38,4 @@ jobs:
           branch: "dockerfile_bot"
           commit-message: "dockerfile: automated nightly updates"
           labels: automerge
-          author: "eclipse-temurin-bot <temurin-bot@eclipse.org>"
+          author: "github-actions[bot] <users.noreply.github.com>"
