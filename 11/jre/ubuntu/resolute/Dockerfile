@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-FROM ubuntu:26.04
+FROM ubuntu:26.04 AS base
 
 ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH=$JAVA_HOME/bin:$PATH
@@ -25,14 +25,39 @@ ENV PATH=$JAVA_HOME/bin:$PATH
 # Default to UTF-8 file.encoding
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
+FROM base AS builder
+
+ARG TARGETARCH
+COPY ${TARGETARCH}/env /opt/env
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN set -eux; \
+    apt update; \
+    apt-get install -y --no-install-recommends curl ca-certificates p11-kit; \
+    . /opt/env; \
+    curl -LsfS -o /tmp/openjdk.tar.gz "${BINARY_URL}"; \
+    echo "${ESUM} */tmp/openjdk.tar.gz" | sha256sum -c -; \
+    mkdir -p "$JAVA_HOME"; \
+    tar --extract \
+        --file /tmp/openjdk.tar.gz \
+        --directory "$JAVA_HOME" \
+        --strip-components 1 \
+        --no-same-owner \
+    ; \
+    rm -f /tmp/openjdk.tar.gz; \
+    rm -rf /var/lib/apt/lists/*; \
+    find "$JAVA_HOME/lib" -name '*.so' -exec dirname '{}' ';' | sort -u > /etc/ld.so.conf.d/docker-openjdk.conf; \
+    ldconfig; \
+    # https://github.com/docker-library/openjdk/issues/212#issuecomment-420979840
+    # https://openjdk.java.net/jeps/341
+    java -Xshare:dump;
+    
+
+FROM base
+
 RUN set -eux; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        # curl required for historical reasons, see https://github.com/adoptium/containers/issues/255
-        curl \
-        wget \
-        # gnupg required to verify the signature
-        gnupg \
         # java.lang.UnsatisfiedLinkError: libfontmanager.so: libfreetype.so.6: cannot open shared object file: No such file or directory
         # java.lang.NoClassDefFoundError: Could not initialize class sun.awt.X11FontManager
         # https://github.com/docker-library/openjdk/pull/235#issuecomment-424466077
@@ -50,56 +75,11 @@ RUN set -eux; \
 
 ENV JAVA_VERSION=jdk-11.0.31+11
 
-RUN set -eux; \
-    ARCH="$(dpkg --print-architecture)"; \
-    case "${ARCH}" in \
-       amd64) \
-         ESUM='a6af3d61851f57eb79ef0189837522329717458bf230ee284da2d26634f1ea3a'; \
-         BINARY_URL='https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.31%2B11/OpenJDK11U-jre_x64_linux_hotspot_11.0.31_11.tar.gz'; \
-         ;; \
-       arm64) \
-         ESUM='eabe05fb80626ad24db17cf1df137855e77fbacbc83c11aaf243cedd224467de'; \
-         BINARY_URL='https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.31%2B11/OpenJDK11U-jre_aarch64_linux_hotspot_11.0.31_11.tar.gz'; \
-         ;; \
-       armhf) \
-         ESUM='5d3e988cdc8291779068c957c01d339f26178ff65d13af4671107b169e80a69f'; \
-         BINARY_URL='https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.31%2B11/OpenJDK11U-jre_arm_linux_hotspot_11.0.31_11.tar.gz'; \
-         ;; \
-       ppc64el) \
-         ESUM='11e58bf1eeae10f0dc1a98cc43bf97af270a0b516f6ff9fb3189024c5e22550a'; \
-         BINARY_URL='https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.31%2B11/OpenJDK11U-jre_ppc64le_linux_hotspot_11.0.31_11.tar.gz'; \
-         ;; \
-       s390x) \
-         ESUM='4c311b19aa3922951be288076f0f41a831ab7af32284da9b3e21cdaa251a078a'; \
-         BINARY_URL='https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.31%2B11/OpenJDK11U-jre_s390x_linux_hotspot_11.0.31_11.tar.gz'; \
-         ;; \
-       *) \
-         echo "Unsupported arch: ${ARCH}"; \
-         exit 1; \
-         ;; \
-    esac; \
-    wget --progress=dot:giga -O /tmp/openjdk.tar.gz ${BINARY_URL}; \
-    wget --progress=dot:giga -O /tmp/openjdk.tar.gz.sig ${BINARY_URL}.sig; \
-    export GNUPGHOME="$(mktemp -d)"; \
-    # gpg: key 843C48A565F8F04B: "Adoptium GPG Key (DEB/RPM Signing Key) <temurin-dev@eclipse.org>" imported
-    gpg --batch --keyserver keyserver.ubuntu.com --recv-keys 3B04D753C9050D9A5D343F39843C48A565F8F04B; \
-    gpg --batch --verify /tmp/openjdk.tar.gz.sig /tmp/openjdk.tar.gz; \
-    rm -rf "${GNUPGHOME}" /tmp/openjdk.tar.gz.sig; \
-    echo "${ESUM} */tmp/openjdk.tar.gz" | sha256sum -c -; \
-    mkdir -p "$JAVA_HOME"; \
-    tar --extract \
-        --file /tmp/openjdk.tar.gz \
-        --directory "$JAVA_HOME" \
-        --strip-components 1 \
-        --no-same-owner \
-    ; \
-    rm -f /tmp/openjdk.tar.gz; \
-    # https://github.com/docker-library/openjdk/issues/331#issuecomment-498834472
-    find "$JAVA_HOME/lib" -name '*.so' -exec dirname '{}' ';' | sort -u > /etc/ld.so.conf.d/docker-openjdk.conf; \
-    ldconfig; \
-    # https://github.com/docker-library/openjdk/issues/212#issuecomment-420979840
-    # https://openjdk.java.net/jeps/341
-    java -Xshare:dump;
+COPY --from=builder /opt/java /opt/java
+
+# https://github.com/docker-library/openjdk/issues/331#issuecomment-498834472
+RUN find "$JAVA_HOME/lib" -name '*.so' -exec dirname '{}' ';' | sort -u > /etc/ld.so.conf.d/docker-openjdk.conf; \
+    ldconfig;
 
 RUN set -eux; \
     echo "Verifying install ..."; \
