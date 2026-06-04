@@ -20,7 +20,7 @@ and so any critical CVEs in the base O/S layer gets updated by them in short
 order.
 
 Note that the eclipse-temurin images include `openssl` as a prerequisite of
-the `wget` and `ca-certificates` packages but they are NOT included in the
+the `ca-certificates` packages but they are NOT included in the
 Ubuntu base image so updates to openssl will not necessarily trigger an
 rebuild to pick up fixes.  In general, low severity vulnerabilities can wait
 until the next rebuild.  See

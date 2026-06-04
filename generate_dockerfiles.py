@@ -75,7 +75,7 @@ def archHelper(arch, os_name):
     if arch == "aarch64" and os_name == "ubuntu":
         return "arm64"
     elif arch == "ppc64le" and os_name == "ubuntu":
-        return "ppc64el"
+        return "ppc64le"
     elif arch == "arm":
         return "armhf"
     elif arch == "x64":
@@ -187,26 +187,18 @@ if __name__ == "__main__":
                             binary["architecture"] in architectures
                             and binary["os"] == os_family
                         ):
-                            if os_family == "windows":
-                                # Windows only has x64 binaries
-                                copy_from = openjdk_version.replace(
-                                    "jdk", ""
-                                )  # jdk8u292-b10 -> 8u292-b10
-                                if version != 8:
-                                    copy_from = copy_from.replace("-", "").replace(
-                                        "+", "_"
-                                    )  # 11.0.11+9 -> 11.0.11_9
-                                copy_from = f"{copy_from}-{image_type}-windowsservercore-{base_image.split(':')[1]}"
-                                arch_data = {
-                                    "download_url": binary["installer"]["link"],
-                                    "checksum": binary["installer"]["checksum"],
-                                    "copy_from": copy_from,
-                                }
-                            else:
-                                arch_data[archHelper(binary["architecture"], os_name)] = {
-                                    "download_url": binary["package"]["link"],
-                                    "checksum": binary["package"]["checksum"],
-                                }
+                            architecture = archHelper(binary["architecture"], os_name)
+                            architecture_directory = os.path.join(output_directory, architecture)
+                            os.makedirs(architecture_directory, exist_ok=True)
+                            arch_data[architecture] = {
+                                "download_url": binary["package"]["link"],
+                                "checksum": binary["package"]["checksum"],
+                            }
+
+                            env_path = os.path.join(architecture_directory, "env")
+                            with open(env_path, "w") as f:
+                                f.write(f'export BINARY_URL="{binary["package"]["link"]}"\n')
+                                f.write(f'export ESUM="{binary["package"]["checksum"]}"\n')
 
                         else:
                             continue

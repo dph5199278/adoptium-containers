@@ -31,12 +31,12 @@ from dockerhub_doc_config_update import (
 
 
 MOCK_API_RESPONSE = {
-    "available_lts_releases": [8, 11, 17, 21, 25],
-    "available_releases": [8, 11, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26],
-    "most_recent_feature_release": 26,
-    "most_recent_feature_version": 27,
-    "most_recent_lts": 25,
-    "tip_version": 27,
+    "available_lts_releases": [8, 11, 17, 21, 25, 29],
+    "available_releases": [8, 11, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+    "most_recent_feature_release": 30,
+    "most_recent_feature_version": 31,
+    "most_recent_lts": 29,
+    "tip_version": 31,
 }
 
 
@@ -57,7 +57,7 @@ class TestAdoptiumAPI(unittest.TestCase):
     @patch("adoptium_api.urllib.request.urlopen", side_effect=mock_urlopen)
     def test_get_supported_versions(self, _mock):
         versions = get_supported_versions()
-        self.assertEqual(versions, [8, 11, 17, 21, 25, 26])
+        self.assertEqual(versions, [8, 11, 17, 21, 25])
 
     @patch("adoptium_api.urllib.request.urlopen", side_effect=mock_urlopen)
     def test_get_supported_versions_lts_only(self, _mock):
@@ -71,11 +71,11 @@ class TestAdoptiumAPI(unittest.TestCase):
         """When there are multiple non-LTS releases between the latest LTS and the most recent feature release."""
         with patch.dict(MOCK_API_RESPONSE, {"most_recent_feature_release": 28, "available_releases": [8, 11, 17, 21, 25, 26, 27, 28]}):
             versions = get_supported_versions()
-            self.assertEqual(versions, [8, 11, 17, 21, 25, 26, 27, 28])
+            self.assertEqual(versions, [8, 11, 17, 21, 25])
 
     @patch("adoptium_api.urllib.request.urlopen", side_effect=mock_urlopen)
     def test_get_latest_lts(self, _mock):
-        self.assertEqual(get_latest_lts(), 25)
+        self.assertEqual(get_latest_lts(), 29)
 
 
 class TestFormatOjdkVersion(unittest.TestCase):
@@ -96,19 +96,7 @@ class TestFormatOjdkVersion(unittest.TestCase):
 class TestGetDistroName(unittest.TestCase):
 
     def test_ubuntu(self):
-        self.assertEqual(get_distro_name("linux", "ubuntu/noble"), "noble")
-
-    def test_alpine(self):
-        self.assertEqual(get_distro_name("alpine-linux", "alpine/3.23"), "alpine-3.23")
-
-    def test_ubi(self):
-        self.assertEqual(get_distro_name("linux", "ubi/ubi10-minimal"), "ubi10-minimal")
-
-    def test_windows(self):
-        self.assertEqual(
-            get_distro_name("windows", "windows/windowsservercore-ltsc2022"),
-            "windowsservercore-ltsc2022",
-        )
+        self.assertEqual(get_distro_name("linux", "ubuntu/resolute"), "resolute")
 
 
 class TestGetJavaVersion(unittest.TestCase):

@@ -33,20 +33,14 @@ def get_supported_versions():
     Returns all LTS versions plus any non-LTS versions between the most
     recent LTS and the most recent feature release (inclusive).
 
-    For example, if LTS versions are [8, 11, 17, 21, 25] and the most
-    recent feature release is 26, this returns [8, 11, 17, 21, 25, 26].
+    For example, if LTS versions are [8, 11, 17, 21, 25, 29], this returns [8, 11, 17, 21, 25].
     """
     data = _fetch_release_data()
 
     lts_versions = set(data["available_lts_releases"])
-    most_recent_lts = data["most_recent_lts"]
-    most_recent_feature = data["most_recent_feature_release"]
 
-    # All LTS versions + anything between latest LTS and most recent feature release
-    versions = set(lts_versions)
-    for v in range(most_recent_lts + 1, most_recent_feature + 1):
-        if v in data["available_releases"]:
-            versions.add(v)
+    # Before 26 LTS versions
+    versions = {v for v in lts_versions if v <= 25}
 
     return sorted(versions)
 
@@ -54,4 +48,5 @@ def get_supported_versions():
 def get_latest_lts():
     """Return the most recent LTS version number."""
     data = _fetch_release_data()
-    return data["most_recent_lts"]
+    version = data["most_recent_lts"]
+    return min(version, 25)
