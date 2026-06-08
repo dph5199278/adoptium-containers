@@ -25,9 +25,8 @@ architecture_overrides:
 
 configurations:
   linux:
-  # EOL April 2031
-  - directory: ubuntu/resolute
-    image: ubuntu:26.04
-    # TODO add riscv64 back once upstream docker can build it
+  # EOL June 2030
+  - directory: debian/trixie
+    image: debian:trixie-slim
     architectures: [aarch64, ppc64le, riscv64, s390x, x64]
-    os: ubuntu
+    os: debian

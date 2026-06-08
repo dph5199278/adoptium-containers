@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-FROM ubuntu:26.04 AS base
+FROM debian:trixie-slim AS base
 
 ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH=$JAVA_HOME/bin:$PATH
@@ -62,7 +62,7 @@ RUN set -eux; \
         # java.lang.NoClassDefFoundError: Could not initialize class sun.awt.X11FontManager
         # https://github.com/docker-library/openjdk/pull/235#issuecomment-424466077
         fontconfig \
-        # utilities for keeping Ubuntu and OpenJDK CA certificates in sync
+        # utilities for keeping Debian and OpenJDK CA certificates in sync
         # https://github.com/adoptium/containers/issues/293
         ca-certificates p11-kit \
         tzdata \
@@ -73,7 +73,7 @@ RUN set -eux; \
     locale-gen en_US.UTF-8; \
     rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_VERSION=jdk-17.0.19+10
+ENV JAVA_VERSION=jdk-11.0.31+11
 
 COPY --from=builder /opt/java /opt/java
 

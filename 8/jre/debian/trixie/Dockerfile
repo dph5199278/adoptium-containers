@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-FROM ubuntu:26.04 AS base
+FROM debian:trixie-slim AS base
 
 ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH=$JAVA_HOME/bin:$PATH
@@ -47,11 +47,7 @@ RUN set -eux; \
     rm -f /tmp/openjdk.tar.gz; \
     rm -rf /var/lib/apt/lists/*; \
     find "$JAVA_HOME/lib" -name '*.so' -exec dirname '{}' ';' | sort -u > /etc/ld.so.conf.d/docker-openjdk.conf; \
-    ldconfig; \
-    # https://github.com/docker-library/openjdk/issues/212#issuecomment-420979840
-    # https://openjdk.java.net/jeps/341
-    java -Xshare:dump;
-    
+    ldconfig;
 
 FROM base
 
@@ -62,7 +58,7 @@ RUN set -eux; \
         # java.lang.NoClassDefFoundError: Could not initialize class sun.awt.X11FontManager
         # https://github.com/docker-library/openjdk/pull/235#issuecomment-424466077
         fontconfig \
-        # utilities for keeping Ubuntu and OpenJDK CA certificates in sync
+        # utilities for keeping Debian and OpenJDK CA certificates in sync
         # https://github.com/adoptium/containers/issues/293
         ca-certificates p11-kit \
         tzdata \
@@ -73,7 +69,7 @@ RUN set -eux; \
     locale-gen en_US.UTF-8; \
     rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_VERSION=jdk-21.0.11+10
+ENV JAVA_VERSION=jdk8u492-b09
 
 COPY --from=builder /opt/java /opt/java
 
@@ -83,7 +79,7 @@ RUN find "$JAVA_HOME/lib" -name '*.so' -exec dirname '{}' ';' | sort -u > /etc/l
 
 RUN set -eux; \
     echo "Verifying install ..."; \
-    echo "java --version"; java --version; \
+    echo "java -version"; java -version; \
     echo "Complete."
 COPY --chmod=755 entrypoint.sh /__cacert_entrypoint.sh
 ENTRYPOINT ["/__cacert_entrypoint.sh"]
