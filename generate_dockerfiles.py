@@ -72,14 +72,14 @@ def resolve_architectures(default_architectures, overrides, version):
 
 
 def archHelper(arch, os_name):
-    if arch == "aarch64" and os_name == "ubuntu":
+    if arch == "aarch64" and os_name == "debian":
         return "arm64"
-    elif arch == "ppc64le" and os_name == "ubuntu":
+    elif arch == "ppc64le" and os_name == "debian":
         return "ppc64le"
     elif arch == "arm":
         return "armhf"
     elif arch == "x64":
-        if os_name == "ubuntu":
+        if os_name == "debian":
             return "amd64"
         else:
             return "x86_64"

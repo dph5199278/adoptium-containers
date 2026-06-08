@@ -15,47 +15,47 @@ jobs:
           - JAVA: 8
             PLATFORMS: linux/amd64,linux/arm64/v8,linux/ppc64le
             TYPE: jre
-            DIR: ubuntu/resolute
+            DIR: debian/trixie
           - JAVA: 8
             PLATFORMS: linux/amd64,linux/arm64/v8,linux/ppc64le
             TYPE: jdk
-            DIR: ubuntu/resolute
+            DIR: debian/trixie
 
           - JAVA: 11
             PLATFORMS: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/s390x
             TYPE: jre
-            DIR: ubuntu/resolute
+            DIR: debian/trixie
           - JAVA: 11
             PLATFORMS: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/s390x
             TYPE: jdk
-            DIR: ubuntu/resolute
+            DIR: debian/trixie
 
           - JAVA: 17
             PLATFORMS: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/riscv64,linux/s390x
             TYPE: jre
-            DIR: ubuntu/resolute
+            DIR: debian/trixie
           - JAVA: 17
             PLATFORMS: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/riscv64,linux/s390x
             TYPE: jdk
-            DIR: ubuntu/resolute
+            DIR: debian/trixie
 
           - JAVA: 21
             PLATFORMS: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/riscv64,linux/s390x
             TYPE: jre
-            DIR: ubuntu/resolute
+            DIR: debian/trixie
           - JAVA: 21
             PLATFORMS: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/riscv64,linux/s390x
             TYPE: jdk
-            DIR: ubuntu/resolute
+            DIR: debian/trixie
 
           - JAVA: 25
             PLATFORMS: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/riscv64,linux/s390x
             TYPE: jre
-            DIR: ubuntu/resolute
+            DIR: debian/trixie
           - JAVA: 25
             PLATFORMS: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/riscv64,linux/s390x
             TYPE: jdk
-            DIR: ubuntu/resolute
+            DIR: debian/trixie
 
     runs-on: ubuntu-latest
     env:

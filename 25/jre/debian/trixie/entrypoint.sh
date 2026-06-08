@@ -1,9 +1,22 @@
-{%- if os == "debian" -%}
-#!/usr/bin/env bash
-{%- else -%}
 #!/usr/bin/env sh
-{%- endif %}
-{% include 'partials/license.j2' %}
+# ------------------------------------------------------------------------------
+#             NOTE: THIS FILE IS GENERATED VIA "generate_dockerfiles.py"
+#
+#                       PLEASE DO NOT EDIT IT DIRECTLY.
+# ------------------------------------------------------------------------------
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 # This script defines `sh` as the interpreter, which is available in all POSIX environments. However, it might get
 # started with `bash` as the shell to support dotted.environment.variable.names which are not supported by POSIX, but
 # are supported by `sh` in some Linux flavours.
@@ -13,12 +26,7 @@ set -e
 TMPDIR=${TMPDIR:-/tmp}
 
 # JDK truststore location
-{%- if version|int == 8 and image_type == "jdk" %}
-# JDK8 puts its JRE in a subdirectory
-JRE_CACERTS_PATH=$JAVA_HOME/jre/lib/security/cacerts
-{%- else %}
 JRE_CACERTS_PATH=$JAVA_HOME/lib/security/cacerts
-{%- endif %}
 
 # Opt-in is only activated if the environment variable is set
 if [ -n "$USE_SYSTEM_CA_CERTS" ]; then
@@ -37,11 +45,7 @@ if [ -n "$USE_SYSTEM_CA_CERTS" ]; then
     # is not routed through this wrapper: its -destkeystore/-srckeystore do
     # not trigger the warning and have no -cacerts form.
     keytool_truststore() {
-{%- if version|int >= 9 %}
         keytool -cacerts "$@"
-{%- else %}
-        keytool -keystore "$JRE_CACERTS_PATH" "$@"
-{%- endif %}
     }
 
     # Figure out whether we can write to the JVM truststore. If we can, we'll add the certificates there. If not,
@@ -54,12 +58,10 @@ if [ -n "$USE_SYSTEM_CA_CERTS" ]; then
         JRE_CACERTS_PATH=$JRE_CACERTS_PATH_NEW
         # If we use a custom truststore, we need to make sure that the JVM uses it
         export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -Djavax.net.ssl.trustStore=${JRE_CACERTS_PATH} -Djavax.net.ssl.trustStorePassword=changeit"
-{%- if version|int >= 9 %}
         # Rebind: -cacerts would still resolve to the read-only default.
         keytool_truststore() {
             keytool -keystore "$JRE_CACERTS_PATH" "$@"
         }
-{%- endif %}
     fi
 
     tmp_store=$(mktemp)
@@ -121,18 +123,7 @@ if [ -n "$USE_SYSTEM_CA_CERTS" ]; then
         # The reason why this is not part of the opt-in is because it leaves open the option to mount certificates at the
         # system location, for whatever reason.
         if [ -d /certificates ] && [ "$(ls -A /certificates 2>/dev/null)" ]; then
-            {%- if os == "debian" or os == "alpine-linux" %}
-            cp -La /certificates/* /usr/local/share/ca-certificates/
-            {%- elif os == "ubi-minimal" %}
-            cp -La /certificates/* /usr/share/pki/ca-trust-source/anchors/
-            {%- endif %}
         fi
-
-        {%- if os == "debian" or os == "alpine-linux" %}
-        update-ca-certificates
-        {%- elif os == "ubi-minimal" %}
-        update-ca-trust
-        {%- endif %}
     else
         # If we are not root, we cannot update the system truststore. That's bad news for tools like `curl` and `wget`,
         # but since the JVM is the primary focus here, we can live with that.
@@ -144,4 +135,3 @@ fi
 export JRE_CACERTS_PATH
 
 exec "$@"
-
