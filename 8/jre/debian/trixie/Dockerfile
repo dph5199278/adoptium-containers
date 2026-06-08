@@ -58,7 +58,7 @@ RUN set -eux; \
         # java.lang.NoClassDefFoundError: Could not initialize class sun.awt.X11FontManager
         # https://github.com/docker-library/openjdk/pull/235#issuecomment-424466077
         fontconfig \
-        # utilities for keeping Ubuntu and OpenJDK CA certificates in sync
+        # utilities for keeping Debian and OpenJDK CA certificates in sync
         # https://github.com/adoptium/containers/issues/293
         ca-certificates p11-kit \
         tzdata \
