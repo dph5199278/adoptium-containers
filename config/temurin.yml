@@ -25,8 +25,7 @@ architecture_overrides:
 
 configurations:
   linux:
-  # EOL June 2030
   - directory: debian/trixie
-    image: debian:trixie-slim
+    image: debian:13-slim
     architectures: [aarch64, ppc64le, riscv64, s390x, x64]
     os: debian
