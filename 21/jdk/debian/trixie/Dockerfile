@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-FROM debian:trixie-slim AS base
+FROM debian:13-slim AS base
 
 ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH=$JAVA_HOME/bin:$PATH
@@ -76,7 +76,7 @@ RUN set -eux; \
     locale-gen en_US.UTF-8; \
     rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_VERSION=jdk-21.0.11+10
+ENV JAVA_VERSION=jdk-21.0.12+8
 
 COPY --from=builder /opt/java /opt/java
 
