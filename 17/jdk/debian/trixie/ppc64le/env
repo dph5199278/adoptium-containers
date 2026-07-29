@@ -1,2 +1,2 @@
-export BINARY_URL="https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_ppc64le_linux_hotspot_17.0.19_10.tar.gz"
-export ESUM="c9d8dc52960ff00aa8c321e211cc5284a2151cffdedeac998f5297066cbad245"
+export BINARY_URL="https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20%2B8/OpenJDK17U-jdk_ppc64le_linux_hotspot_17.0.20_8.tar.gz"
+export ESUM="a14127c5577dc12e058459549e5388fd47ebd1b3d8441fbd23c4d931bdcebee9"

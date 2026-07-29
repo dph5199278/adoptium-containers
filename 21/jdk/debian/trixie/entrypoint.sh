@@ -76,7 +76,7 @@ if [ -n "$USE_SYSTEM_CA_CERTS" ]; then
     rm -f "$tmp_store"
 
     # Import the additional certificate into JVM truststore
-    find -L /certificates -name "*crt" -type f 2>/dev/null | sort | while IFS= read -r i; do
+    find -L /certificates -path '*/..*' -prune -o -type f -name "*crt" -print 2>/dev/null | sort | while IFS= read -r i; do
         tmp_dir=$(mktemp -d)
         BASENAME=$(basename "$i" .crt)
 
@@ -85,24 +85,40 @@ if [ -n "$USE_SYSTEM_CA_CERTS" ]; then
         csplit -s -z -b %02d.crt -f "$tmp_dir/$BASENAME-" "$i" '/-----BEGIN CERTIFICATE-----/' '{*}'
 
         for crt in "$tmp_dir/$BASENAME"-*; do
-            # Extract the Common Name (CN) and Serial Number from the certificate
+            # Extract the Common Name (CN) from the certificate
             CN=$(openssl x509 -in "$crt" -noout -subject -nameopt -space_eq | sed -n 's/^.*CN=\([^,]*\).*$/\1/p')
-            SERIAL=$(openssl x509 -in "$crt" -noout -serial | sed -n 's/^serial=\(.*\)$/\1/p')
+
+            # Compute the certificate SHA-256 fingerprint. It is used both to skip certificates that are
+            # already present and to build a collision-free alias below. A certificate that openssl cannot
+            # parse yields an empty fingerprint; skip it rather than risk a non-unique alias.
+            FINGERPRINT=$(openssl x509 -in "$crt" -noout -fingerprint -sha256 2>/dev/null | cut -d'=' -f2)
+            if [ -z "$FINGERPRINT" ]; then
+                echo "Could not read the fingerprint of a certificate in $i, skipping"
+                continue
+            fi
 
             # Check if the certificate is already in the JVM truststore by fingerprint. This prevents
             # failures on container restart when the certificate was added to the system CA store in a
             # previous run and is now being re-imported via keytool -importkeystore.
-            FINGERPRINT=$(openssl x509 -in "$crt" -noout -fingerprint -sha256 2>/dev/null | cut -d'=' -f2)
-            if [ -n "$FINGERPRINT" ] && keytool_truststore -list -storepass changeit -v 2>/dev/null | grep -qiF "$FINGERPRINT"; then
+            if keytool_truststore -list -storepass changeit -v 2>/dev/null | grep -qiF "$FINGERPRINT"; then
                 echo "Certificate with CN=$CN is already in the JVM truststore, skipping"
                 continue
             fi
 
-            # Check if an alias with the CN already exists in the keystore
-            ALIAS=$CN
-            if keytool_truststore -list -storepass changeit -alias "$ALIAS" >/dev/null 2>&1; then
-                # If the CN already exists, append the serial number to the alias
-                ALIAS="${CN}_${SERIAL}"
+            # Normalized, globally-unique fingerprint suffix used to disambiguate aliases. The serial
+            # number is not reliable for this: CA roots can share a non-unique serial (e.g. 00) and may
+            # have no CN at all, which previously collapsed every such cert to the same alias.
+            FP=$(printf '%s' "$FINGERPRINT" | tr -d ':' | tr 'A-Z' 'a-z')
+
+            if [ -n "$CN" ]; then
+                # Use the CN as the alias, falling back to the fingerprint on collision
+                ALIAS=$CN
+                if keytool_truststore -list -storepass changeit -alias "$ALIAS" >/dev/null 2>&1; then
+                    ALIAS="${CN}_${FP}"
+                fi
+            else
+                # No CN available: derive a unique, deterministic alias from the fingerprint
+                ALIAS="adoptium_${FP}"
             fi
 
             echo "Adding certificate with alias $ALIAS to the JVM truststore"
@@ -120,9 +136,11 @@ if [ -n "$USE_SYSTEM_CA_CERTS" ]; then
         # The reason why this is not part of the opt-in is because it leaves open the option to mount certificates at the
         # system location, for whatever reason.
         if [ -d /certificates ] && [ "$(ls -A /certificates 2>/dev/null)" ]; then
-            find -L /certificates -name "*crt" -type f | while IFS= read -r _crt; do
+            find -L /certificates -path '*/..*' -prune -o -type f -name "*crt" -print 2>/dev/null | while IFS= read -r _crt; do
                 _rel="${_crt#/certificates/}"
-                cp -L "$_crt" "/usr/local/share/ca-certificates/${_rel//\//_}"
+                _dst_rel="${_rel//_/__}"
+                _dst_rel="${_dst_rel//\//_}"
+                cp -L "$_crt" "/usr/local/share/ca-certificates/${_dst_rel}"
             done
         fi
         update-ca-certificates
