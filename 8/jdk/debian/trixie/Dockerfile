@@ -69,7 +69,7 @@ RUN set -eux; \
     locale-gen en_US.UTF-8; \
     rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_VERSION=jdk8u492-b09
+ENV JAVA_VERSION=jdk8u502-b07
 
 COPY --from=builder /opt/java /opt/java
 

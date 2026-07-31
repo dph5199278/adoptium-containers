@@ -1,2 +1,2 @@
-export BINARY_URL="https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u492-b09/OpenJDK8U-jre_aarch64_linux_hotspot_8u492b09.tar.gz"
-export ESUM="d5e50cb002600007dbdfac523605d26196607fa5212db0942ef05cdce9fe2892"
+export BINARY_URL="https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u502-b07/OpenJDK8U-jre_aarch64_linux_hotspot_8u502b07.tar.gz"
+export ESUM="4ffd3abaf65a47610096d9c25ea06f2439428f1c087d3e54eb518553a6115638"
