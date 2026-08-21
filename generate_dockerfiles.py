@@ -159,7 +159,7 @@ if __name__ == "__main__":
                     os.makedirs(output_directory, exist_ok=True)
 
                     # Fetch latest release for version from Adoptium API
-                    url = f"https://api.adoptium.net/v3/assets/feature_releases/{version}/ga?page=0&image_type={image_type}&os={os_family}&page_size=1&vendor=eclipse"
+                    url = f"https://api.adoptium.net/v3/assets/feature_releases/{version}/ga?page=0&image_type={image_type}&os={os_family}&page_size=2&vendor=eclipse"
                     response = requests.get(url, headers=headers)
 
                     # Handle 404 errors gracefully - skip this version if not available
@@ -170,7 +170,11 @@ if __name__ == "__main__":
                     response.raise_for_status()
                     data = response.json()
 
-                    release = response.json()[0]
+                    release1 = response.json()[0]
+                    release1_len = len(release1["binaries"])
+                    release2 = response.json()[1]
+                    release2_len = len(release2["binaries"])
+                    release = release1 if release1_len >= release2_len else release2
 
                     # Extract the version number from the release name
                     openjdk_version = release["release_name"]

@@ -1,0 +1,2 @@
+export BINARY_URL="https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12%2B8/OpenJDK21U-jre_s390x_linux_hotspot_21.0.12_8.tar.gz"
+export ESUM="2ec0aecaec755ffa8c7904983f89873e51c28e683de39946ba49496acae8fe96"
