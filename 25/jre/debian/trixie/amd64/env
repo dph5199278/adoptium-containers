@@ -1,2 +1,2 @@
-export BINARY_URL="https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4%2B7/OpenJDK25U-jre_x64_linux_hotspot_25.0.4_7.tar.gz"
-export ESUM="aed3915f8facc0c80733ab2448bb0df4b494a36a2c5759e9a6e1eb979720f2b3"
+export BINARY_URL="https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jre_x64_linux_hotspot_25.0.4.1_1.tar.gz"
+export ESUM="1731a34baadec5479258ea0202e4d5d865d2efeee60cb0c7d7eb056fe96ca219"
