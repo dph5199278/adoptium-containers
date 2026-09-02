@@ -8,7 +8,31 @@ permissions: read-all
 
 jobs:
   dependabot:
+    runs-on: ubuntu-latest
+    # 只有 Dependabot 触发的 PR 才执行
+    if: ${{ github.actor == 'dependabot[bot]' }}
     permissions:
       contents: write
       pull-requests: write
-    uses: adoptium/.github/.github/workflows/dependabot-auto-merge.yml@main
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: "${{ secrets.ADOPTIUM_TEMURIN_BOT_TOKEN }}"
+
+      - name: Approve Dependabot PRs
+        # 不自动批准 semver major 更新
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
+        run: gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.ADOPTIUM_TEMURIN_BOT_TOKEN }}
+
+      - name: Enable auto-merge for Dependabot PRs
+        # 不自动合并 semver major 更新
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.ADOPTIUM_TEMURIN_BOT_TOKEN }}
