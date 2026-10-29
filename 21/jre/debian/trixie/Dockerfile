@@ -73,7 +73,7 @@ RUN set -eux; \
     locale-gen en_US.UTF-8; \
     rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_VERSION=jdk-21.0.12.1+1
+ENV JAVA_VERSION=jdk-21.0.13+9
 
 COPY --from=builder /opt/java /opt/java
 
