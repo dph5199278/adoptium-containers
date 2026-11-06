@@ -1,2 +1,2 @@
-export BINARY_URL="https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.32.1%2B1/OpenJDK11U-jre_x64_linux_hotspot_11.0.32.1_1.tar.gz"
-export ESUM="5eb6cf7f45c623272c64b8e7b4934a8051abb7ae73bfd28488a9856da3f4848a"
+export BINARY_URL="https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.33%2B10/OpenJDK11U-jre_x64_linux_hotspot_11.0.33_10.tar.gz"
+export ESUM="038086c264806875f3610317acc3455ce8daaf73561349c514efd646bb24a6e9"
