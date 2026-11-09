@@ -171,10 +171,10 @@ if __name__ == "__main__":
                     data = response.json()
 
                     release1 = response.json()[0]
-                    release1_len = len(release1["binaries"])
                     release2 = response.json()[1]
-                    release2_len = len(release2["binaries"])
-                    release = release1 if release1_len >= release2_len else release2
+
+                    release1_archs = {binary["architecture"] for binary in release1["binaries"]}
+                    release = release1 if release1_archs.issuperset(architectures) else release2
 
                     # Extract the version number from the release name
                     openjdk_version = release["release_name"]
